@@ -1,6 +1,57 @@
 # Finora UI contract
 
-This is the class/token agreement for later implementation, not a stylesheet. Molham alone edits `client/src/index.css`, imported once from main.tsx. No other CSS files, modules, styled-components, inline style objects, runtime style injection, or per-element custom-property assignments. Other owners submit exact class/token requests in their task reports.
+## Shell implementation status
+
+The app shell and shared stylesheet are now implemented in `client/`.
+The values below remain the design baseline; `client/src/index.css` is
+the source of truth for implemented token values. Semantic foregrounds
+were darkened for readability; controls are at least 44px tall.
+At mobile widths the drawer is 260px wide, capped to leave a backdrop gutter.
+Feature-specific classes provide initial styling for later components.
+Financial behavior and shared Modal/feedback component implementations are
+still separate tasks. Page content is explicitly marked as placeholder.
+
+Added shell/placeholder classes:
+
+| Classes | Use |
+| --- | --- |
+| app-brand-group, app-topbar-actions, app-add-transaction | Header grouping and always-visible transaction link |
+| app-sidebar-heading, app-sidebar-bottom | Drawer heading and lower navigation |
+| app-content, page-stack | Constrained content and vertical page spacing |
+| placeholder-intro, placeholder-symbol, placeholder-note | Explicit route placeholder content |
+| feature-grid, feature-card, feature-number | Responsive feature overview cards |
+| badge | Neutral informational badge |
+| navigation-open | Body scroll lock while the mobile drawer is open |
+
+Additional tokens: `--avatar-size`, `--placeholder-symbol-size`,
+`--reading-width`, `--table-min-width`, and `--font-size-hero`.
+
+### Using the shared styles
+
+- Buttons: compose `button` with `button--primary`, `button--secondary`,
+  `button--light`, or `button--danger`.
+- Inputs: place a visible label and control within `field`. Use
+  `field-hint`/`field-error` with `aria-describedby` and
+  `aria-invalid`. Group fields with `form-grid`.
+- Cards: use `card` and `card-heading`; feature content controls its padding.
+- Tables: wrap a semantic table in `table-scroll`. Give the wrapper
+  `tabIndex={0}`, `role="region"`, and an accessible name when horizontal
+  scrolling is possible so keyboard users can scroll it.
+- Dialogs: use a native `dialog.modal` with `modal-content`,
+  `modal-heading`, and `modal-actions`; open it with `showModal()`.
+  CSS alone does not implement focus, dismissal, or pending-state behavior.
+- Feedback: compose `feedback` with `feedback--loading`,
+  `feedback--error`, or `feedback--empty`; apply appropriate live-region
+  roles in the component.
+- Toasts: `toast-queue` contains `toast` plus success/error/info modifiers.
+- Budgets: compose `budgets-status` with the documented status modifier.
+  Always include visible status text.
+- Progress: use `progress.progress` with an accessible name and numeric
+  value/max attributes; no inline width or custom-property assignment.
+
+The existing registry and contracts below remain the team agreement.
+
+This document defines the shared class/token agreement. Molham alone edits `client/src/index.css`, imported once from main.tsx. No other CSS files, modules, styled-components, inline style objects, runtime style injection, or per-element custom-property assignments. Other owners submit exact class/token requests in their task reports.
 
 ## Visual baseline
 
