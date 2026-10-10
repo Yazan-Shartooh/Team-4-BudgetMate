@@ -9,10 +9,10 @@ import { randomUUID } from 'node:crypto';
 import { CategoriesService } from '../categories/categories.service';
 import { fromCents, isValidMonth, round1, toCents } from '../common/utils';
 import { SEED_BUDGETS, type SeedBudget } from '../seeds/seed-data';
+import type { Budget, BudgetStatus, BudgetUsage } from '../types';
 import { TransactionsService } from '../transactions/transactions.service';
 import { CreateBudgetDto } from './dto/create-budget.dto';
 import { UpdateBudgetDto } from './dto/update-budget.dto';
-import type { Budget, BudgetStatus, BudgetUsage } from './budget.types';
 
 @Injectable()
 export class BudgetsService implements OnModuleInit {
@@ -47,7 +47,8 @@ export class BudgetsService implements OnModuleInit {
   create(dto: CreateBudgetDto): Budget {
     this.assertValidBudget(dto);
     const duplicate = this.budgets.some(
-      (budget) => budget.month === dto.month && budget.category === dto.category,
+      (budget) =>
+        budget.month === dto.month && budget.category === dto.category,
     );
     if (duplicate) {
       throw new ConflictException(
@@ -143,7 +144,8 @@ export class BudgetsService implements OnModuleInit {
   }
 
   private assertMonth(month: string | undefined): void {
-    if (!month) throw new BadRequestException('Month is required in YYYY-MM format.');
+    if (!month)
+      throw new BadRequestException('Month is required in YYYY-MM format.');
     if (!isValidMonth(month)) {
       throw new BadRequestException('Month must use YYYY-MM format.');
     }
@@ -153,21 +155,31 @@ export class BudgetsService implements OnModuleInit {
     this.assertMonth(candidate.month);
     if (!this.categoriesService.isExpenseCategory(candidate.category)) {
       if (this.categoriesService.isIncomeCategory(candidate.category)) {
-        throw new BadRequestException('Budgets can only be set for expense categories.');
+        throw new BadRequestException(
+          'Budgets can only be set for expense categories.',
+        );
       }
-      throw new BadRequestException(`Category "${candidate.category}" does not exist.`);
+      throw new BadRequestException(
+        `Category "${candidate.category}" does not exist.`,
+      );
     }
     this.assertAmount(candidate.amount);
   }
 
   private assertAmount(amount: number): void {
     if (typeof amount !== 'number' || !Number.isFinite(amount)) {
-      throw new BadRequestException('Budget amount must be a number with at most two decimal places.');
+      throw new BadRequestException(
+        'Budget amount must be a number with at most two decimal places.',
+      );
     }
-    if (amount <= 0) throw new BadRequestException('Budget amount must be greater than zero.');
-    if (amount > 1_000_000) throw new BadRequestException('Budget amount is too large.');
+    if (amount <= 0)
+      throw new BadRequestException('Budget amount must be greater than zero.');
+    if (amount > 1_000_000)
+      throw new BadRequestException('Budget amount is too large.');
     if (Math.abs(amount * 100 - Math.round(amount * 100)) > 1e-7) {
-      throw new BadRequestException('Budget amount must have at most two decimal places.');
+      throw new BadRequestException(
+        'Budget amount must have at most two decimal places.',
+      );
     }
   }
 }

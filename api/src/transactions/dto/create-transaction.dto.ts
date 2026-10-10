@@ -9,7 +9,7 @@ import {
   MaxLength,
   IsPositive,
 } from 'class-validator';
-import type { TransactionType } from '../transaction.types';
+import type { TransactionType } from '../../types';
 
 export class CreateTransactionDto {
   @IsIn(['income', 'expense'], {

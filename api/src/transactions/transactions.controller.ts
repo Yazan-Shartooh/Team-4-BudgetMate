@@ -14,7 +14,7 @@ import { CreateTransactionDto } from './dto/create-transaction.dto';
 import { FilterTransactionDto } from './dto/filter-transaction.dto';
 import { UpdateTransactionDto } from './dto/update-transaction.dto';
 import { TransactionsService } from './transactions.service';
-import type { Transaction } from './transaction.types';
+import type { Transaction } from '../types';
 
 @Controller('transactions')
 export class TransactionsController {

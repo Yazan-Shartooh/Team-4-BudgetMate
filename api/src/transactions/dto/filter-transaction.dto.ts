@@ -1,5 +1,11 @@
-import { IsIn, IsNotEmpty, IsOptional, IsString, Matches } from 'class-validator';
-import type { TransactionType } from '../transaction.types';
+import {
+  IsIn,
+  IsNotEmpty,
+  IsOptional,
+  IsString,
+  Matches,
+} from 'class-validator';
+import type { TransactionType } from '../../types';
 
 export class FilterTransactionDto {
   @IsOptional()

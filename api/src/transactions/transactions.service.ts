@@ -6,12 +6,19 @@ import {
 } from '@nestjs/common';
 import { randomUUID } from 'node:crypto';
 import { CategoriesService } from '../categories/categories.service';
-import { fromCents, isValidDate, isValidMonth, monthOf, todayISO, toCents } from '../common/utils';
+import {
+  fromCents,
+  isValidDate,
+  isValidMonth,
+  monthOf,
+  todayISO,
+  toCents,
+} from '../common/utils';
 import { SEED_TRANSACTIONS, type SeedTransaction } from '../seeds/seed-data';
+import type { Transaction, TransactionFilter, TransactionType } from '../types';
 import { CreateTransactionDto } from './dto/create-transaction.dto';
 import { FilterTransactionDto } from './dto/filter-transaction.dto';
 import { UpdateTransactionDto } from './dto/update-transaction.dto';
-import type { Transaction, TransactionFilter, TransactionType } from './transaction.types';
 
 type TransactionCandidate = {
   type: TransactionType;
@@ -56,8 +63,10 @@ export class TransactionsService implements OnModuleInit {
     return this.transactions
       .filter((transaction) => {
         if (filter.type && transaction.type !== filter.type) return false;
-        if (filter.category && transaction.category !== filter.category) return false;
-        if (filter.month && monthOf(transaction.date) !== filter.month) return false;
+        if (filter.category && transaction.category !== filter.category)
+          return false;
+        if (filter.month && monthOf(transaction.date) !== filter.month)
+          return false;
         return true;
       })
       .sort(
@@ -122,8 +131,13 @@ export class TransactionsService implements OnModuleInit {
       throw new BadRequestException('Type must be "income" or "expense".');
     }
 
-    if (typeof candidate.amount !== 'number' || !Number.isFinite(candidate.amount)) {
-      throw new BadRequestException('Amount must be a number with at most two decimal places.');
+    if (
+      typeof candidate.amount !== 'number' ||
+      !Number.isFinite(candidate.amount)
+    ) {
+      throw new BadRequestException(
+        'Amount must be a number with at most two decimal places.',
+      );
     }
     if (candidate.amount <= 0) {
       throw new BadRequestException('Amount must be greater than zero.');
@@ -131,27 +145,46 @@ export class TransactionsService implements OnModuleInit {
     if (candidate.amount > 1_000_000) {
       throw new BadRequestException('Amount is too large.');
     }
-    if (Math.abs(candidate.amount * 100 - Math.round(candidate.amount * 100)) > 1e-7) {
-      throw new BadRequestException('Amount must have at most two decimal places.');
+    if (
+      Math.abs(candidate.amount * 100 - Math.round(candidate.amount * 100)) >
+      1e-7
+    ) {
+      throw new BadRequestException(
+        'Amount must have at most two decimal places.',
+      );
     }
 
-    if (typeof candidate.category !== 'string' || candidate.category.trim() === '') {
+    if (
+      typeof candidate.category !== 'string' ||
+      candidate.category.trim() === ''
+    ) {
       throw new BadRequestException('Category is required.');
     }
-    if (!this.categoriesService.isValidCategory(candidate.type, candidate.category)) {
+    if (
+      !this.categoriesService.isValidCategory(
+        candidate.type,
+        candidate.category,
+      )
+    ) {
       if (this.categoriesService.isKnownCategory(candidate.category)) {
-        const actualType = this.categoriesService.isIncomeCategory(candidate.category)
+        const actualType = this.categoriesService.isIncomeCategory(
+          candidate.category,
+        )
           ? 'income'
           : 'expense';
         throw new BadRequestException(
           `${candidate.category} is an ${actualType} category and cannot be used for an ${candidate.type}.`,
         );
       }
-      throw new BadRequestException(`Category "${candidate.category}" does not exist.`);
+      throw new BadRequestException(
+        `Category "${candidate.category}" does not exist.`,
+      );
     }
 
     if (!isValidDate(candidate.date)) {
-      throw new BadRequestException('Date must be a real date in YYYY-MM-DD format.');
+      throw new BadRequestException(
+        'Date must be a real date in YYYY-MM-DD format.',
+      );
     }
     if (candidate.date > todayISO()) {
       throw new BadRequestException('Date cannot be in the future.');
@@ -166,18 +199,31 @@ export class TransactionsService implements OnModuleInit {
   }
 
   private assertValidFilter(filter: TransactionFilter): void {
-    if (filter.type !== undefined && filter.type !== 'income' && filter.type !== 'expense') {
-      throw new BadRequestException('Type filter must be "income" or "expense".');
+    if (
+      filter.type !== undefined &&
+      filter.type !== 'income' &&
+      filter.type !== 'expense'
+    ) {
+      throw new BadRequestException(
+        'Type filter must be "income" or "expense".',
+      );
     }
-    if (filter.category !== undefined && !this.categoriesService.isKnownCategory(filter.category)) {
-      throw new BadRequestException(`Category "${filter.category}" does not exist.`);
+    if (
+      filter.category !== undefined &&
+      !this.categoriesService.isKnownCategory(filter.category)
+    ) {
+      throw new BadRequestException(
+        `Category "${filter.category}" does not exist.`,
+      );
     }
     if (filter.month !== undefined && !isValidMonth(filter.month)) {
       throw new BadRequestException('Month filter must use YYYY-MM format.');
     }
   }
 
-  private toStoredTransaction(candidate: TransactionCandidate | SeedTransaction): Transaction {
+  private toStoredTransaction(
+    candidate: TransactionCandidate | SeedTransaction,
+  ): Transaction {
     return {
       id: randomUUID(),
       type: candidate.type,
