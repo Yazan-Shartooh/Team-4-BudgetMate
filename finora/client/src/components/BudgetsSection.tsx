@@ -8,6 +8,7 @@ import BudgetForm from './BudgetForm';
 import Modal from './Modal';
 import LoadingMessage from './LoadingMessage';
 import ErrorMessage from './ErrorMessage';
+import MonthFilter from './MonthFilter';
 
 export interface BudgetsSectionProps {
   month: string;
@@ -34,14 +35,13 @@ function BudgetsContent(props: BudgetsSectionProps) {
   const { notify } = useNotifications();
   const busy = props.pending || submitting;
   const close = () => { if (!busy) { setEditing(null); setRemoving(null); setLocalError(null); props.onClearMutation(); } };
-  const MonthControl = props.MonthFilterComponent;
+  const MonthControl = props.MonthFilterComponent ?? MonthFilter;
   const monthProps: MonthFilterProps = { id: `${id}-month`, label: 'Budget month', value: props.month, disabled: busy || Boolean(editing || removing), onChange: (month) => { if (month) props.onMonthChange(month); } };
   const existing: Budget | undefined = editing?.budgetId != null && editing.budgetAmount != null
     ? { id: editing.budgetId, category: editing.category, month: editing.month, amount: editing.budgetAmount } : undefined;
   return <section className="budgets-section page-stack" aria-label="Budgets">
     <div className="page-heading"><div><p className="eyebrow">Plan with purpose</p><h1>Budgets</h1><p>Give every category a little direction.</p></div>
-      {MonthControl ? <MonthControl {...monthProps} /> : <label className="month-filter" htmlFor={monthProps.id}>Budget month<input className="month-filter-input" type="month" id={monthProps.id} required value={props.month} disabled={monthProps.disabled}
-        onChange={(event) => { if (/^(?!0000)\d{4}-(0[1-9]|1[0-2])$/.test(event.target.value)) monthProps.onChange(event.target.value); }} /></label>}</div>
+      <MonthControl {...monthProps} /></div>
     <div className="budgets-intro"><p>Unbudgeted spending is still included in all totals.</p><div className="budgets-key"><span className="budgets-status budgets-status--on-track">On track: under 80%</span><span className="budgets-status budgets-status--near-limit">Near limit: 80–100%</span><span className="budgets-status budgets-status--exceeded">Exceeded: over 100%</span></div></div>
     {props.status === 'idle' && <div className="feedback"><p>Budget and spending data have not loaded yet.</p><button type="button" className="button button--secondary" onClick={props.onRetry}>Load budgets and spending</button></div>}
     {props.status === 'pending' && <LoadingMessage message="Loading budgets and spending…" />}

@@ -7,9 +7,10 @@ import { getCurrentMonth, selectBudgetUsage } from '../store/selectors';
 import { clearBudgetMutationState, deleteBudget, fetchBudgets, saveBudget } from '../store/budgetsSlice';
 import { fetchTransactions } from '../store/transactionsSlice';
 import BudgetsSection from '../components/BudgetsSection';
+import type { BudgetsSectionProps } from '../components/BudgetsSection';
 import ErrorMessage from '../components/ErrorMessage';
 
-interface BudgetsPageProps { MonthFilterComponent?: ComponentType<MonthFilterProps> }
+interface BudgetsPageProps { MonthFilterComponent?: ComponentType<MonthFilterProps>; budgets?: BudgetsSectionProps }
 function ConnectedBudgetsPage({ MonthFilterComponent }: BudgetsPageProps) {
   const dispatch = useAppDispatch();
   const [month, setMonth] = useState(getCurrentMonth);
@@ -27,7 +28,7 @@ function ConnectedBudgetsPage({ MonthFilterComponent }: BudgetsPageProps) {
 
 export default function BudgetsPage(props: BudgetsPageProps) {
   const redux = useContext(ReactReduxContext);
-  return <div className="budgets-page">{redux ? <ConnectedBudgetsPage {...props} /> : <>
+  return <div className="budgets-page">{props.budgets ? <BudgetsSection {...props.budgets} /> : redux ? <ConnectedBudgetsPage {...props} /> : <>
     <div className="page-heading"><div><h1>Budgets</h1><p>Give every category a little direction.</p></div></div>
     <ErrorMessage message="Budgets are unavailable while the application connection is being completed. Please try again later." />
   </>}</div>;

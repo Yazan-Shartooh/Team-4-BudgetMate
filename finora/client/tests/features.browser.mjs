@@ -183,6 +183,27 @@ try {
     assert.equal(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth + 1), true, `budgets overflow at ${width}`);
   }
   await page.screenshot({ path: 'node_modules/.cache/feature-checks/budgets.png', fullPage: true });
+  await page.getByRole('button', { name: 'Report test' }).click();
+  assert.equal(await page.locator('tbody tr').count(), 7);
+  assert.equal(await page.locator('table button').count(), 0);
+  assert.equal(await page.locator('.report-category').count(), 7);
+  assert.match(await page.locator('.report-summary').textContent(), /\$500.00.*\$201.00.*\$299.00.*59.8%/);
+  assert.match(await page.locator('.report-breakdown').textContent(), /Entertainment.*\$101.00.*50.2%/);
+  assert.match(await page.locator('tbody tr').filter({ hasText: 'Entertainment' }).textContent(), /101.0%.*Exceeded/);
+  assert.equal(await page.getByRole('progressbar', { name: 'Entertainment budget used: 101.0%' }).getAttribute('value'), '100');
+  for (const width of [360, 390, 768, 1024, 1440]) {
+    await page.setViewportSize({ width, height: 900 });
+    assert.equal(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth + 1), true, `report overflow at ${width}`);
+  }
+  await page.screenshot({ path: 'node_modules/.cache/feature-checks/report.png', fullPage: true });
+  await page.getByLabel('Report month').fill('2030-04');
+  assert.match(await page.locator('.report-section').textContent(), /No transactions this month/);
+  assert.match(await page.locator('.report-summary').textContent(), /Savings rate: N\/A/);
+  assert.equal(await page.locator('progress').count(), 7);
+  assert.equal(await page.locator('progress[value="0"]').count(), 7);
+  await page.getByLabel('Report month').fill('');
+  assert.equal(await page.getByLabel('Report month').inputValue(), '2030-04');
+  console.log('PASS: report totals, percentages, all categories, capped bars with actual usage text, empty month, required month, read-only comparison, and responsive widths.');
   assert.deepEqual(errors, []);
   console.log('PASS: fixture-backed create/edit/delete, combined filters, validation, failed-request draft retention, pending Escape guard, dialog focus/Tab/Escape/restoration, budget set/edit/remove, 7 category rows, statuses, read-only mode, no horizontal overflow at 360/390/768/1024/1440px. This is not a live NestJS verification.');
 } finally {
